@@ -99,7 +99,7 @@ public class SwerveModule extends SubsystemBase {
             .closedLoopRampRate(SwerveModuleConstants.kDriveMotorRampRate)
             .smartCurrentLimit(SwerveModuleConstants.kDriveMotorCurrentLimit)
             .voltageCompensation(12)
-            .inverted(true);
+            .inverted(false);
 
         // Configure the turning encoder
         this.turnConfig.encoder
@@ -322,7 +322,7 @@ public class SwerveModule extends SubsystemBase {
     public SwerveModuleState getRealState() {
         return new SwerveModuleState(
             getVelocity(),
-            Rotation2d.fromRotations(this.getAngle().in(Rotations))
+            Rotation2d.fromRotations(getAbsoluteEncoderPosition().in(Rotations))
         );
     }
 

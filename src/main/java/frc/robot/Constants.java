@@ -39,7 +39,7 @@ public final class Constants {
   }
 
   public static class SwerveChassisConstants {
-    public static final CTRECANDevice kGyroDevice = new CTRECANDevice(34, "*");
+    public static final CTRECANDevice kGyroDevice = new CTRECANDevice(35);
 
     public static final class PhysicalModel {
       // * MAX DISPLACEMENT SPEED (and acceleration)
@@ -116,25 +116,25 @@ public final class Constants {
     public static final SwerveModuleOptions kFrontLeftOptions = new SwerveModuleOptions()
         .setDriveMotorID(2)
         .setTurningMotorID(3)
-        .setAbsoluteEncoderCANDevice(new CTRECANDevice(4, "*"))
+        .setAbsoluteEncoderCANDevice(new CTRECANDevice(4))
         .setName("Front Left");
 
     public static final SwerveModuleOptions kFrontRightOptions = new SwerveModuleOptions()
         .setDriveMotorID(5)
         .setTurningMotorID(6)
-        .setAbsoluteEncoderCANDevice(new CTRECANDevice(7, "*"))
+        .setAbsoluteEncoderCANDevice(new CTRECANDevice(7))
         .setName("Front Right");
 
     public static final SwerveModuleOptions kBackLeftOptions = new SwerveModuleOptions()
         .setDriveMotorID(8)
         .setTurningMotorID(9)
-        .setAbsoluteEncoderCANDevice(new CTRECANDevice(10, "*"))
+        .setAbsoluteEncoderCANDevice(new CTRECANDevice(10))
         .setName("Back Left");
 
     public static final SwerveModuleOptions kBackRightOptions = new SwerveModuleOptions()
         .setDriveMotorID(11)
         .setTurningMotorID(12)
-        .setAbsoluteEncoderCANDevice(new CTRECANDevice(13, "*"))
+        .setAbsoluteEncoderCANDevice(new CTRECANDevice(13))
         .setName("Back Right");
   }
 
