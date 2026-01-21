@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.SwerveChassisConstants;
 import frc.robot.commands.DriveSwerve;
+import frc.robot.speedAlterators.LookToward;
 import frc.robot.subsystems.SwerveChassis;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.subsystems.Gyro.Gyro;
@@ -14,10 +15,15 @@ import lib.Elastic;
 import lib.Elastic.Notification;
 import lib.Elastic.Notification.NotificationLevel;
 import lib.BlueShift.control.CustomController;
+import lib.BlueShift.control.ToggleTrigger;
 import lib.BlueShift.control.CustomController.CustomControllerType;
 import lib.BlueShift.odometry.swerve.BlueShiftOdometry;
 import lib.BlueShift.odometry.vision.camera.LimelightOdometryCamera;
 import lib.BlueShift.odometry.vision.camera.VisionOdometryFilters;
+
+import static frc.robot.Constants.FuelConstants.*;
+
+import org.opencv.core.Point;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
@@ -31,9 +37,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.CANFuelSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -53,6 +61,8 @@ public class RobotContainer {
 
   private final SendableChooser<Command> m_autonomousChooser;
 
+  private final CANFuelSubsystem ballSubsystem = new CANFuelSubsystem();
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     this.chassis = new SwerveChassis(
@@ -63,8 +73,9 @@ public class RobotContainer {
       new Gyro(new GyroIOPigeon(Constants.SwerveChassisConstants.kGyroDevice))
     );
 
+    
     this.m_limelight3G = new LimelightOdometryCamera("limelight_threeg", false, true, VisionOdometryFilters::visionFilter);
-
+    
     this.m_odometry = new BlueShiftOdometry(
       Constants.SwerveChassisConstants.PhysicalModel.kDriveKinematics, 
       chassis::getHeading,
@@ -72,15 +83,15 @@ public class RobotContainer {
       new Pose2d(),
       0.02,
       m_limelight3G
-    );
-
-    RobotConfig ppRobotConfig = null;
-    try{
-      ppRobotConfig = RobotConfig.fromGUISettings();
-    } catch (Exception e) {
-      Elastic.sendNotification(new Notification(NotificationLevel.ERROR, "ERROR! COULD NOT LOAD PP ROBOT CONFIG", e.getMessage()));
-      DriverStation.reportError("ERROR! COULD NOT LOAD PP ROBOT CONFIG", e.getStackTrace());
-    }
+      );
+      
+      RobotConfig ppRobotConfig = null;
+      try{
+        ppRobotConfig = RobotConfig.fromGUISettings();
+      } catch (Exception e) {
+        Elastic.sendNotification(new Notification(NotificationLevel.ERROR, "ERROR! COULD NOT LOAD PP ROBOT CONFIG", e.getMessage()));
+        DriverStation.reportError("ERROR! COULD NOT LOAD PP ROBOT CONFIG", e.getStackTrace());
+      }
 
     AutoBuilder.configure(
       m_odometry::getEstimatedPosition,
@@ -100,6 +111,7 @@ public class RobotContainer {
     SmartDashboard.putData("AutoChooser", m_autonomousChooser);
 
     SmartDashboard.putData("Chassis/ResetTurningEncoders", new InstantCommand(chassis::resetTurningEncoders).ignoringDisable(true));
+    SmartDashboard.putData("Chassis/ZeroHeading", new InstantCommand(chassis::zeroHeading).ignoringDisable(true));
 
     // Configure the trigger bindings
     configureBindings();
@@ -115,11 +127,32 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    // While the left bumper on operator controller is held, intake Fuel
+    DRIVER.leftBumper()
+        .whileTrue(ballSubsystem.spinUpCommand().finallyDo(ballSubsystem::stop));
+    // While the right bumper on the operator controller is held, spin up for 1
+    // second, then launch fuel. When the button is released, stop.
+    DRIVER.rightBumper()
+        .whileTrue(ballSubsystem.spinUpCommand().withTimeout(SPIN_UP_SECONDS)
+            .andThen(ballSubsystem.launchCommand())
+            .finallyDo(() -> ballSubsystem.stop()));
+    
+    // While the A button is held on the operator controller, eject fuel back out
+    // the intake
+    DRIVER.bottomButton()
+        .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop()));
+    
+    Trigger lookAtTrigger = new ToggleTrigger(DRIVER.rightButton());
+
+    lookAtTrigger.whileTrue(runEnd(() -> chassis.enableSpeedAlterator(new LookToward(m_odometry::getEstimatedPosition, new Point(4.62, 4.03))), () -> chassis.disableSpeedAlterator()));
+
+    DRIVER.rightStickButton().onTrue(new InstantCommand(chassis::zeroHeading));
+
     this.chassis.setDefaultCommand(new DriveSwerve(
         chassis,
         () -> -DRIVER.getLeftY(),
         () -> -DRIVER.getLeftX(),
-        () -> DRIVER.getLeftTrigger() - DRIVER.getRightTrigger(),
+        () -> DRIVER.getRightTrigger() - DRIVER.getLeftTrigger(),
         () -> !DRIVER.bottomButton().getAsBoolean()
       )
     );
@@ -131,6 +164,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    return m_autonomousChooser.getSelected();
   }
 }
