@@ -55,7 +55,8 @@ public class GyroIOPigeon implements GyroIO {
     }
     
     public void reset() {
-        gyro.reset();
+        gyro.setYaw(90.0);
+        // gyro.reset();
     }
 
     public double getVelocityX() {

@@ -321,7 +321,7 @@ public class SwerveModule extends SubsystemBase {
      */
     public SwerveModuleState getRealState() {
         return new SwerveModuleState(
-            getVelocity(),
+            getVelocity().times(3),
             Rotation2d.fromRotations(getAbsoluteEncoderPosition().in(Rotations))
         );
     }

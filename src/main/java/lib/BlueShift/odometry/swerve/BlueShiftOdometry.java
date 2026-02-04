@@ -4,6 +4,8 @@ package lib.BlueShift.odometry.swerve;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -131,9 +133,11 @@ public class BlueShiftOdometry extends SubsystemBase {
         );
 
         // Update field pose
-        m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
+        // m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
 
-        // Send field to dash
-        SmartDashboard.putData("Field", m_field);
+        // // Send field to dash
+        // SmartDashboard.putData("Field", m_field);
+
+        Logger.recordOutput("Odometry/EstimatedRobotPosition", m_poseEstimator.getEstimatedPosition());
     }
 }
