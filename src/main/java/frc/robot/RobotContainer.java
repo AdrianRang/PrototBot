@@ -66,7 +66,6 @@ public class RobotContainer {
 
     this.shooter = new Shooter();
     this.indexer = new Indexer();
-
     
     // this.m_limelight3G = new LimelightOdometryCamera("limelight_threeg", false, true, VisionOdometryFilters::visionFilter);
     

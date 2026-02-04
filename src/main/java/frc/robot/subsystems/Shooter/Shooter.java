@@ -6,21 +6,21 @@ import static frc.robot.subsystems.Shooter.ShooterConstants.*;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class Shooter extends SubsystemBase {
-    private final SparkMax leftMotor;
-    private final SparkMax rightMotor;
+    private final SparkFlex leftMotor;
+    private final SparkFlex rightMotor;
 
     public Shooter() {
-        this.leftMotor = new SparkMax(kLeftMotorID, MotorType.kBrushless);
-        this.rightMotor = new SparkMax(kRightMotorID, MotorType.kBrushless);
+        this.leftMotor = new SparkFlex(kLeftMotorID, MotorType.kBrushless);
+        this.rightMotor = new SparkFlex(kRightMotorID, MotorType.kBrushless);
 
-        SparkMaxConfig leftConfig = new SparkMaxConfig();
-        SparkMaxConfig rightConfig = new SparkMaxConfig();
+       SparkFlexConfig leftConfig = new SparkFlexConfig();
+       SparkFlexConfig rightConfig = new SparkFlexConfig();
 
         leftConfig
             .smartCurrentLimit(kCurrentLimit)

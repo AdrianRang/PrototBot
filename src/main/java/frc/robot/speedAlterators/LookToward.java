@@ -24,7 +24,7 @@ public class LookToward extends SpeedAlterator {
 
     @Override
     public ChassisSpeeds alterSpeed(ChassisSpeeds speeds, boolean robotRelative) {
-        double angle = Math.atan2(odoSupplier.get().getY() - target.y, odoSupplier.get().getX() - target.x);
+        double angle = Math.atan2(odoSupplier.get().getY() - target.y, odoSupplier.get().getX() - target.x) + Math.PI;
         double omegaRadiansPerSecond = pid.calculate(odoSupplier.get().getRotation().getRadians(), angle);
 
         return new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, omegaRadiansPerSecond);
