@@ -1,0 +1,3 @@
+[keys.normal.space]
+i = [":u", ":sh echo Building", ":sh cd ../../../ && ./gradlew build"]
+o = [":u", ":sh echo Deploying", ":sh cd ../../../ && ./gradlew deploy"]

@@ -13,6 +13,7 @@ import frc.robot.subsystems.Gyro.Gyro;
 import frc.robot.subsystems.Gyro.GyroIOPigeon;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Intake.Intake;
 import lib.Elastic;
 import lib.Elastic.Notification;
 import lib.Elastic.Notification.NotificationLevel;
@@ -49,6 +50,7 @@ public class RobotContainer {
   private final SwerveChassis chassis;
   private final Shooter shooter;
   private final Indexer indexer;
+  private final Intake intake;
 
   private final BlueShiftOdometry m_odometry;
 
@@ -66,6 +68,7 @@ public class RobotContainer {
 
     this.shooter = new Shooter();
     this.indexer = new Indexer();
+    this.intake = new Intake();
     
     // this.m_limelight3G = new LimelightOdometryCamera("limelight_threeg", false, true, VisionOdometryFilters::visionFilter);
     
@@ -141,14 +144,20 @@ public class RobotContainer {
 
     DRIVER.rightStickButton().onTrue(new InstantCommand(chassis::zeroHeading));
 
-    DRIVER.rightButton().whileTrue(ScoringCommands.shootCommand(shooter, indexer));
+    DRIVER.rightButton().whileTrue(ScoringCommands.shootCommand(shooter, indexer, intake));
+
+    DRIVER.bottomButton().onTrue(intake.intakeCommand().alongWith(indexer.hopperCommand())).onFalse(intake.stopCommand().alongWith(indexer.stopCommand()));
+    DRIVER.leftButton().onTrue(ScoringCommands.ejectIntake(intake, indexer)).onFalse(ScoringCommands.stop(shooter, indexer).alongWith(intake.stopCommand()));
+    // DRIVER.leftButton().onTrue(shooter.speedUpCommand()).onFalse(shooter.stopCommand());
+    // DRIVER.povLeft().onTrue(indexer.passCommand()).onFalse(indexer.stopCommand());
 
     this.chassis.setDefaultCommand(new DriveSwerve(
         chassis,
         () -> -DRIVER.getLeftY(),
         () -> -DRIVER.getLeftX(),
         () -> DRIVER.getRightTrigger() - DRIVER.getLeftTrigger(),
-        () -> !DRIVER.bottomButton().getAsBoolean()
+        // () -> !DRIVER.bottomButton().getAsBoolean()
+        () -> !DRIVER.topButton().getAsBoolean()
       )
     );
   }
@@ -159,6 +168,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return m_autonomousChooser.getSelected();
-  }
+    return ScoringCommands.shootCommand(shooter, indexer, intake);
+    }
 }

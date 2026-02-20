@@ -1,0 +1,4 @@
+[keys.normal.space]
+i = [":u", ":sh echo Building", ":sh ./gradlew build -Dorg.gradle.java.home=/Users/adrianrangel/wpilib/2026/jdk"]
+o = [":u", ":sh echo Deploying", ":sh ./gradlew deploy -Dorg.gradle.java.home=/Users/adrianrangel/wpilib/2026/jdk"]
+
