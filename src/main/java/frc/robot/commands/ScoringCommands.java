@@ -19,17 +19,19 @@ public class ScoringCommands {
         );
     }
 
-    public static Command continuousShootCommand(Shooter shooter, Indexer indexer) {
+    public static Command continuousShootCommand(Shooter shooter, Indexer indexer, Intake intake) {
         return new RunCommand(() -> {
             shooter.speedUp();
+            intake.intake();
             if (shooter.upToSpeed()) {
                 indexer.pass();
             } else {
                 indexer.stop();
             }
-        }) .finallyDo((boolean interrupted) -> {
+        }).finallyDo((boolean interrupted) -> {
             shooter.stop();
             indexer.stop();
+            intake.stop();
         });
     }
 

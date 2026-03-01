@@ -21,6 +21,7 @@ import lib.BlueShift.control.CustomController;
 import lib.BlueShift.control.CustomController.CustomControllerType;
 import lib.BlueShift.odometry.swerve.BlueShiftOdometry;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
@@ -69,6 +70,7 @@ public class RobotContainer {
     this.shooter = new Shooter();
     this.indexer = new Indexer();
     this.intake = new Intake();
+    NamedCommands.registerCommand("SHOOT", ScoringCommands.continuousShootCommand(shooter, indexer, intake));
     
     // this.m_limelight3G = new LimelightOdometryCamera("limelight_threeg", false, true, VisionOdometryFilters::visionFilter);
     
@@ -109,6 +111,7 @@ public class RobotContainer {
     SmartDashboard.putData("Chassis/ResetTurningEncoders", new InstantCommand(chassis::resetTurningEncoders).ignoringDisable(true));
     SmartDashboard.putData("Chassis/ZeroHeading", new InstantCommand(chassis::zeroHeading).ignoringDisable(true));
 
+
     // Configure the trigger bindings
     configureBindings();
   }
@@ -144,7 +147,7 @@ public class RobotContainer {
 
     DRIVER.rightStickButton().onTrue(new InstantCommand(chassis::zeroHeading));
 
-    DRIVER.rightButton().whileTrue(ScoringCommands.shootCommand(shooter, indexer, intake));
+    DRIVER.rightButton().whileTrue(ScoringCommands.continuousShootCommand(shooter, indexer, intake));
 
     DRIVER.bottomButton().onTrue(intake.intakeCommand().alongWith(indexer.hopperCommand())).onFalse(intake.stopCommand().alongWith(indexer.stopCommand()));
     DRIVER.leftButton().onTrue(ScoringCommands.ejectIntake(intake, indexer)).onFalse(ScoringCommands.stop(shooter, indexer).alongWith(intake.stopCommand()));
@@ -168,6 +171,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return ScoringCommands.shootCommand(shooter, indexer, intake);
-    }
+    // return ScoringCommands.shootCommand(shooter, indexer, intake);
+    return m_autonomousChooser.getSelected();
+  }
 }

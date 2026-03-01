@@ -1,13 +1,19 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.Shooter.ShooterConstants.*;
+
+import org.littletonrobotics.junction.Logger;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -27,12 +33,21 @@ public class Shooter extends SubsystemBase {
             .smartCurrentLimit(kCurrentLimit)
             .idleMode(IdleMode.kCoast)
             .openLoopRampRate(kRampRate)
+            .closedLoopRampRate(kRampRate)
             .inverted(false);
+
+        leftConfig.closedLoop.feedForward.kV(kV);
+
+        leftConfig.closedLoop
+            .p(kP)
+            .i(kI)
+            .d(kD);
 
         rightConfig
             .smartCurrentLimit(kCurrentLimit)
             .idleMode(IdleMode.kCoast)
             .openLoopRampRate(kRampRate)
+            .closedLoopRampRate(kRampRate)
             .inverted(false)
             .follow(leftMotor, true);
 
@@ -43,9 +58,14 @@ public class Shooter extends SubsystemBase {
     public void set(double voltage) {
         this.leftMotor.setVoltage(voltage);
     }
+
+    public void set(AngularVelocity velocity) {
+        this.leftMotor.getClosedLoopController().setSetpoint(velocity.in(RPM), ControlType.kVelocity);
+    }
     
     public void speedUp() {
-        this.leftMotor.setVoltage(kShootVoltage);
+        // this.leftMotor.setVoltage(kShootVoltage);
+        set(kShootSpeed);
     }
 
     public void stop() {
@@ -54,7 +74,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean upToSpeed() {
-        return Math.abs(this.leftMotor.getEncoder().getVelocity()) > kMinShootSpeed;
+        // return Math.abs(this.leftMotor.getEncoder().getVelocity()) > kMinShootSpeed;
+        return Math.abs(this.leftMotor.getClosedLoopController().getSetpoint() - this.leftMotor.getEncoder().getVelocity()) < kEpsilon;
     }
 
     public Command speedUpCommand() {
@@ -69,5 +90,6 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("Shooter/UpToSpeed", upToSpeed());
         SmartDashboard.putNumber("Shooter/speed", this.leftMotor.getEncoder().getVelocity());
+        SmartDashboard.putNumber("Shooter/setpoint", this.leftMotor.getClosedLoopController().getSetpoint());
     }
  }

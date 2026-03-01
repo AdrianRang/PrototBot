@@ -53,7 +53,7 @@ public class Indexer extends SubsystemBase {
             .smartCurrentLimit(kCurrentLimit)
             .idleMode(IdleMode.kBrake)
             .openLoopRampRate(kRampRate)
-            .inverted(false);
+            .inverted(true);
             
         this.lowerMotor.configure(lowerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         this.upperMotor.configure(upperConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
